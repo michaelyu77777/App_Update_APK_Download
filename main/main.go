@@ -27,13 +27,7 @@ var urlBasicPath = ""
 var downloadURL = []string{}
 
 func main() {
-
-	// 設定 APK路徑
-	setAPKFilePath()
-
-	// 打開APK下載Server
-	openServer()
-
+	openServer() // 打開服務
 }
 
 // 設定APK檔路徑
@@ -82,13 +76,13 @@ func setAPKFilePath() {
 
 }
 
-// 設定Server URL路徑
+// 設定伺服器URL
 func setURLPath() {
 
 	// URL基底
 	urlBasicPath = configurations.GetConfigValueOrPanic("local", "urlBasicPath")
 
-	// URL路徑
+	// URL路徑：基底加上編號
 	downloadURL = []string{
 		"",                 //[0] 保留不用
 		urlBasicPath + "1", // "/appUpdate/download/1"
@@ -108,9 +102,13 @@ func setURLPath() {
 		urlBasicPath + "15"}
 }
 
-// 打開APK下載Server
+// 打開下載伺服器
 func openServer() {
 
+	// 設定 APK路徑
+	setAPKFilePath()
+
+	// 設定 下載URL
 	setURLPath()
 
 	http.HandleFunc(downloadURL[1], downloadFile1) // /appUpdate/download/1
