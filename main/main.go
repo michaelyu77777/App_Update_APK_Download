@@ -9,75 +9,110 @@ import (
 	"leapsy.com/packages/logings"
 )
 
-const (
+const ()
 
-	// URL基底
-	urlBasicPath = "/appUpdate/download/"
+// APK檔路徑基底
+var apkBasicPath = ""
 
-	// APK路徑基底
-	apkBasicPath = "apk/"
-)
+// APK檔名
+var apkFileName = []string{}
+
+// APK檔路徑
+var apkFilePath = []string{}
+
+// URL基底
+var urlBasicPath = ""
 
 // URL路徑
-var downloadURL = []string{
-	"",                 //[0] 保留不用
-	urlBasicPath + "1", // "/appUpdate/download/1"
-	urlBasicPath + "2",
-	urlBasicPath + "3",
-	urlBasicPath + "4",
-	urlBasicPath + "5",
-	urlBasicPath + "6",
-	urlBasicPath + "7",
-	urlBasicPath + "8",
-	urlBasicPath + "9",
-	urlBasicPath + "10",
-	urlBasicPath + "11",
-	urlBasicPath + "12",
-	urlBasicPath + "13",
-	urlBasicPath + "14",
-	urlBasicPath + "15"}
-
-// apk檔案名
-var apkFileName = []string{
-	"",                       //[0] 保留
-	"camera.apk",             //1
-	"album.apk",              //2
-	"webBrowser.apk",         //3
-	"throne.apk",             //4
-	"leapsyStore.apk",        //5
-	"intelligenceSystem.apk", //6
-	"environment.apk",        //7
-	"palace.apk",             //8
-	"FH1.apk",                //9
-	"settings.apk",           //10
-	"programs.apk",           //11
-	"expert.apk",             //12
-	"faceRecognize.apk",      //13
-	"posture.apk",            //14
-	"gesture.apk"}            //15
-
-// apk檔案路徑
-var apkFilePath = []string{
-	"",                                     //[0] 保留
-	apkBasicPath + "1/" + apkFileName[1],   //1 "apk/1/camera.apk"
-	apkBasicPath + "2/" + apkFileName[2],   //2 "apk/2/album.apk"
-	apkBasicPath + "3/" + apkFileName[3],   //3
-	apkBasicPath + "4/" + apkFileName[4],   //4
-	apkBasicPath + "5/" + apkFileName[5],   //5
-	apkBasicPath + "6/" + apkFileName[6],   //6
-	apkBasicPath + "7/" + apkFileName[7],   //7
-	apkBasicPath + "8/" + apkFileName[8],   //8
-	apkBasicPath + "9/" + apkFileName[9],   //9
-	apkBasicPath + "10/" + apkFileName[10], //10
-	apkBasicPath + "11/" + apkFileName[11], //11
-	apkBasicPath + "12/" + apkFileName[12], //12
-	apkBasicPath + "13/" + apkFileName[13], //13
-	apkBasicPath + "14/" + apkFileName[14], //14
-	apkBasicPath + "15/" + apkFileName[15]} //15
+var downloadURL = []string{}
 
 func main() {
 
-	// server
+	// 設定 APK路徑
+	setAPKFilePath()
+
+	// 打開APK下載Server
+	openServer()
+
+}
+
+// 設定APK檔路徑
+func setAPKFilePath() {
+
+	// APK檔路徑基底
+	apkBasicPath = configurations.GetConfigValueOrPanic("local", "apkBasicPath")
+
+	// APK檔名
+	apkFileName = []string{
+		"",                       //[0] 保留
+		"camera.apk",             //1
+		"album.apk",              //2
+		"webBrowser.apk",         //3
+		"throne.apk",             //4
+		"leapsyStore.apk",        //5
+		"intelligenceSystem.apk", //6
+		"environment.apk",        //7
+		"palace.apk",             //8
+		"FH1.apk",                //9
+		"settings.apk",           //10
+		"programs.apk",           //11
+		"expert.apk",             //12
+		"faceRecognize.apk",      //13
+		"posture.apk",            //14
+		"gesture.apk"}            //15
+
+	// APK檔路徑
+	apkFilePath = []string{
+		"",                                     //[0] 保留
+		apkBasicPath + "1/" + apkFileName[1],   //1 "apk/1/camera.apk"
+		apkBasicPath + "2/" + apkFileName[2],   //2 "apk/2/album.apk"
+		apkBasicPath + "3/" + apkFileName[3],   //3
+		apkBasicPath + "4/" + apkFileName[4],   //4
+		apkBasicPath + "5/" + apkFileName[5],   //5
+		apkBasicPath + "6/" + apkFileName[6],   //6
+		apkBasicPath + "7/" + apkFileName[7],   //7
+		apkBasicPath + "8/" + apkFileName[8],   //8
+		apkBasicPath + "9/" + apkFileName[9],   //9
+		apkBasicPath + "10/" + apkFileName[10], //10
+		apkBasicPath + "11/" + apkFileName[11], //11
+		apkBasicPath + "12/" + apkFileName[12], //12
+		apkBasicPath + "13/" + apkFileName[13], //13
+		apkBasicPath + "14/" + apkFileName[14], //14
+		apkBasicPath + "15/" + apkFileName[15]} //15
+
+}
+
+// 設定Server URL路徑
+func setURLPath() {
+
+	// URL基底
+	urlBasicPath = configurations.GetConfigValueOrPanic("local", "urlBasicPath")
+
+	// URL路徑
+	downloadURL = []string{
+		"",                 //[0] 保留不用
+		urlBasicPath + "1", // "/appUpdate/download/1"
+		urlBasicPath + "2",
+		urlBasicPath + "3",
+		urlBasicPath + "4",
+		urlBasicPath + "5",
+		urlBasicPath + "6",
+		urlBasicPath + "7",
+		urlBasicPath + "8",
+		urlBasicPath + "9",
+		urlBasicPath + "10",
+		urlBasicPath + "11",
+		urlBasicPath + "12",
+		urlBasicPath + "13",
+		urlBasicPath + "14",
+		urlBasicPath + "15"}
+}
+
+// 打開APK下載Server
+func openServer() {
+
+	setURLPath()
+
 	http.HandleFunc(downloadURL[1], downloadFile1) // /appUpdate/download/1
 	http.HandleFunc(downloadURL[2], downloadFile2)
 	http.HandleFunc(downloadURL[3], downloadFile3)
@@ -102,14 +137,14 @@ func main() {
 
 	// log
 	logings.SendLog(
-		[]string{`啟動伺服器Port %s 提供APK下載服務`},
+		[]string{`啟動伺服器 Port:%s 提供APK下載服務`},
 		[]interface{}{port},
 		nil,
 		logrus.InfoLevel,
 	)
 
 	// print
-	fmt.Println("啟動伺服器Port ", port, " 提供APK下載服務")
+	fmt.Printf("啟動伺服器 Port:%s 提供APK下載服務\n", port)
 
 	// 開啟Port
 	http.ListenAndServe(":"+port, nil)
