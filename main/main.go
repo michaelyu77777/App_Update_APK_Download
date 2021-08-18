@@ -5,99 +5,100 @@ import (
 	"net/http"
 
 	"github.com/sirupsen/logrus"
-	"leapsy.com/logings"
+	"leapsy.com/packages/configurations"
+	"leapsy.com/packages/logings"
 )
 
 const (
-	port = "63997" //本機測試
-	// port         = "63999" //正式
+
+	// URL基底
 	urlBasicPath = "/appUpdate/download/"
 
-	//URL路徑
-	urlPathName1  = "1"  //
-	urlPathName2  = "2"  //
-	urlPathName3  = "3"  //
-	urlPathName4  = "4"  //
-	urlPathName5  = "5"  //
-	urlPathName6  = "6"  //
-	urlPathName7  = "7"  //
-	urlPathName8  = "8"  //
-	urlPathName9  = "9"  //
-	urlPathName10 = "10" //
-	urlPathName11 = "11" //
-	urlPathName12 = "12" //
-	urlPathName13 = "13" //
-	urlPathName14 = "14" //
-	urlPathName15 = "15" //
-
-	// 檔案路徑與下載檔名
-	filePath1 = "apk/1/camera.apk" //
-	fileName1 = "camera.apk"
-
-	filePath2 = "apk/2/album.apk" //
-	fileName2 = "album.apk"
-
-	filePath3 = "apk/3/webBrowser.apk" //
-	fileName3 = "webBrowser.apk"
-
-	filePath4 = "apk/4/throne.apk" //
-	fileName4 = "throne.apk"
-
-	filePath5 = "apk/5/leapsyStore.apk" //
-	fileName5 = "leapsyStore.apk"
-
-	filePath6 = "apk/6/intelligenceSystem.apk" //
-	fileName6 = "intelligenceSystem.apk"
-
-	filePath7 = "apk/7/environment.apk" //
-	fileName7 = "environment.apk"
-
-	filePath8 = "apk/8/palace.apk" //
-	fileName8 = "palace.apk"
-
-	filePath9 = "apk/9/FH1.apk" //
-	fileName9 = "FH1.apk"
-
-	filePath10 = "apk/10/settings.apk" //
-	fileName10 = "settings.apk"
-
-	filePath11 = "apk/11/programs.apk" //
-	fileName11 = "programs.apk"
-
-	filePath12 = "apk/12/expert.apk" //
-	fileName12 = "expert.apk"
-
-	filePath13 = "apk/13/faceRecognize.apk" //
-	fileName13 = "faceRecognize.apk"
-
-	filePath14 = "apk/14/posture.apk" //
-	fileName14 = "posture.apk"
-
-	filePath15 = "apk/15/gesture.apk" //
-	fileName15 = "gesture.apk"
+	// APK路徑基底
+	apkBasicPath = "apk/"
 )
+
+// URL路徑
+var downloadURL = []string{
+	"",                 //[0] 保留不用
+	urlBasicPath + "1", // "/appUpdate/download/1"
+	urlBasicPath + "2",
+	urlBasicPath + "3",
+	urlBasicPath + "4",
+	urlBasicPath + "5",
+	urlBasicPath + "6",
+	urlBasicPath + "7",
+	urlBasicPath + "8",
+	urlBasicPath + "9",
+	urlBasicPath + "10",
+	urlBasicPath + "11",
+	urlBasicPath + "12",
+	urlBasicPath + "13",
+	urlBasicPath + "14",
+	urlBasicPath + "15"}
+
+// apk檔案名
+var apkFileName = []string{
+	"",                       //[0] 保留
+	"camera.apk",             //1
+	"album.apk",              //2
+	"webBrowser.apk",         //3
+	"throne.apk",             //4
+	"leapsyStore.apk",        //5
+	"intelligenceSystem.apk", //6
+	"environment.apk",        //7
+	"palace.apk",             //8
+	"FH1.apk",                //9
+	"settings.apk",           //10
+	"programs.apk",           //11
+	"expert.apk",             //12
+	"faceRecognize.apk",      //13
+	"posture.apk",            //14
+	"gesture.apk"}            //15
+
+// apk檔案路徑
+var apkFilePath = []string{
+	"",                                     //[0] 保留
+	apkBasicPath + "1/" + apkFileName[1],   //1 "apk/1/camera.apk"
+	apkBasicPath + "2/" + apkFileName[2],   //2 "apk/2/album.apk"
+	apkBasicPath + "3/" + apkFileName[3],   //3
+	apkBasicPath + "4/" + apkFileName[4],   //4
+	apkBasicPath + "5/" + apkFileName[5],   //5
+	apkBasicPath + "6/" + apkFileName[6],   //6
+	apkBasicPath + "7/" + apkFileName[7],   //7
+	apkBasicPath + "8/" + apkFileName[8],   //8
+	apkBasicPath + "9/" + apkFileName[9],   //9
+	apkBasicPath + "10/" + apkFileName[10], //10
+	apkBasicPath + "11/" + apkFileName[11], //11
+	apkBasicPath + "12/" + apkFileName[12], //12
+	apkBasicPath + "13/" + apkFileName[13], //13
+	apkBasicPath + "14/" + apkFileName[14], //14
+	apkBasicPath + "15/" + apkFileName[15]} //15
 
 func main() {
 
-	// 檔案一下載路徑
-	http.HandleFunc(urlBasicPath+urlPathName1, downloadFile1)
-	http.HandleFunc(urlBasicPath+urlPathName2, downloadFile2)
-	http.HandleFunc(urlBasicPath+urlPathName3, downloadFile3)
-	http.HandleFunc(urlBasicPath+urlPathName4, downloadFile4)
-	http.HandleFunc(urlBasicPath+urlPathName5, downloadFile5)
-	http.HandleFunc(urlBasicPath+urlPathName6, downloadFile6)
-	http.HandleFunc(urlBasicPath+urlPathName7, downloadFile7)
-	http.HandleFunc(urlBasicPath+urlPathName8, downloadFile8)
-	http.HandleFunc(urlBasicPath+urlPathName9, downloadFile9)
-	http.HandleFunc(urlBasicPath+urlPathName10, downloadFile10)
-	http.HandleFunc(urlBasicPath+urlPathName11, downloadFile11)
-	http.HandleFunc(urlBasicPath+urlPathName12, downloadFile12)
-	http.HandleFunc(urlBasicPath+urlPathName13, downloadFile13)
-	http.HandleFunc(urlBasicPath+urlPathName14, downloadFile14)
-	http.HandleFunc(urlBasicPath+urlPathName15, downloadFile15)
+	// server
+	http.HandleFunc(downloadURL[1], downloadFile1) // /appUpdate/download/1
+	http.HandleFunc(downloadURL[2], downloadFile2)
+	http.HandleFunc(downloadURL[3], downloadFile3)
+	http.HandleFunc(downloadURL[4], downloadFile4)
+	http.HandleFunc(downloadURL[5], downloadFile5)
+	http.HandleFunc(downloadURL[6], downloadFile6)
+	http.HandleFunc(downloadURL[7], downloadFile7)
+	http.HandleFunc(downloadURL[8], downloadFile8)
+	http.HandleFunc(downloadURL[9], downloadFile9)
+	http.HandleFunc(downloadURL[10], downloadFile10)
+	http.HandleFunc(downloadURL[11], downloadFile11)
+	http.HandleFunc(downloadURL[12], downloadFile12)
+	http.HandleFunc(downloadURL[13], downloadFile13)
+	http.HandleFunc(downloadURL[14], downloadFile14)
+	http.HandleFunc(downloadURL[15], downloadFile15)
 
 	// 啟動log紀錄
 	go logings.StartLogging()
+
+	// api port
+	port := configurations.GetConfigValueOrPanic("local", "port")
 
 	// log
 	logings.SendLog(
@@ -118,297 +119,298 @@ func main() {
 // 檔案一下載
 func downloadFile1(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName1
-	filePath := filePath1
+	apkName := apkFileName[1]
+	apkPath := apkFilePath[1]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
-	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	// print
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
+
+	// 服務設定
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案二下載
 func downloadFile2(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName2
-	filePath := filePath2
+	apkName := apkFileName[2]
+	apkPath := apkFilePath[2]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案三下載
 func downloadFile3(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName3
-	filePath := filePath3
+	apkName := apkFileName[3]
+	apkPath := apkFilePath[3]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案四下載
 func downloadFile4(w http.ResponseWriter, r *http.Request) {
-	fileName := fileName4
-	filePath := filePath4
+	apkName := apkFileName[4]
+	apkPath := apkFilePath[4]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案五下載
 func downloadFile5(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName5
-	filePath := filePath5
+	apkName := apkFileName[5]
+	apkPath := apkFilePath[5]
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案六下載
 func downloadFile6(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName6
-	filePath := filePath6
+	apkName := apkFileName[6]
+	apkPath := apkFilePath[6]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案七下載
 func downloadFile7(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName7
-	filePath := filePath7
+	apkName := apkFileName[7]
+	apkPath := apkFilePath[7]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案八下載
 func downloadFile8(w http.ResponseWriter, r *http.Request) {
-
-	fileName := fileName8
-	filePath := filePath8
+	apkName := apkFileName[8]
+	apkPath := apkFilePath[8]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案9
 func downloadFile9(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName9
-	filePath := filePath9
+	apkName := apkFileName[9]
+	apkPath := apkFilePath[9]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案10
 func downloadFile10(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName10
-	filePath := filePath10
+	apkName := apkFileName[10]
+	apkPath := apkFilePath[10]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案11
 func downloadFile11(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName11
-	filePath := filePath11
+	apkName := apkFileName[11]
+	apkPath := apkFilePath[11]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案12
 func downloadFile12(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName12
-	filePath := filePath12
+	apkName := apkFileName[12]
+	apkPath := apkFilePath[12]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案13
 func downloadFile13(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName13
-	filePath := filePath13
+	apkName := apkFileName[13]
+	apkPath := apkFilePath[13]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案14
 func downloadFile14(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName14
-	filePath := filePath14
+	apkName := apkFileName[14]
+	apkPath := apkFilePath[14]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
 
 // 檔案15
 func downloadFile15(w http.ResponseWriter, r *http.Request) {
 
-	fileName := fileName15
-	filePath := filePath15
+	apkName := apkFileName[15]
+	apkPath := apkFilePath[15]
 
 	// log
 	logings.SendLog(
 		[]string{`收到HOST %s 要求路徑 %s 下載檔案 %s`},
-		[]interface{}{r.Host, r.URL, fileName},
+		[]interface{}{r.Host, r.URL, apkName},
 		nil,
 		logrus.InfoLevel,
 	)
 	//print
-	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", fileName)
+	fmt.Println("收到HOST ", r.Host, " 要求路徑 ", r.URL, "下載檔案", apkName)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+fileName) // 下載檔名
-	http.ServeFile(w, r, filePath)                                          // 檔案路徑
+	w.Header().Set("Content-Disposition", "attachment; filename="+apkName) // 下載檔名
+	http.ServeFile(w, r, apkPath)                                          // 檔案路徑
 }
