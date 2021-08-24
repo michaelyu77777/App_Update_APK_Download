@@ -1,0 +1,374 @@
+package servers
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"reflect"
+	"regexp"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+
+	"leapsy.com/packages/configurations"
+	"leapsy.com/packages/logings"
+	"leapsy.com/packages/network"
+	"leapsy.com/packages/paths"
+	"leapsy.com/records"
+)
+
+// Parameters - URL參數
+type Parameters struct {
+	// MacAddress string `uri:"macAddress"`
+	DownloadKeyword string `uri:"downloadKeyword"`
+}
+
+// APIResponse - API回應
+type APIResponse struct {
+	IsSuccess bool          `json:"isSuccess"` // 是否成功
+	Results   []interface{} `json:"results"`   // 訊息
+}
+
+// APIServer - API伺服器
+type APIServer struct {
+	server *http.Server // 伺服器指標
+}
+
+// EventData - 事件資料
+type EventData struct {
+	Time              time.Time
+	GinContextPointer *gin.Context `json:"-"`
+	Input, Output     interface{}
+	Status            int
+	APIResponse       APIResponse
+}
+
+const ()
+
+var (
+	eventDataChannel = make(chan EventData, configurations.GetConfigPositiveIntValueOrPanic(`local`, `channel-size`))
+)
+
+// GetConfigValueOrPanic - 取得設定值否則結束程式
+/**
+ * @param  string key  關鍵字
+ * @return string 設定資料區塊下關鍵字對應的值
+ */
+func (apiServer *APIServer) GetConfigValueOrPanic(key string) string {
+	return configurations.GetConfigValueOrPanic(reflect.TypeOf(*apiServer).String(), key) // 回傳取得的設定檔區塊下關鍵字對應的值
+}
+
+// GetConfigPositiveIntValueOrPanic - 取得設定整數值否則結束程式
+/**
+ * @param  string key  關鍵字
+ * @return int 設定資料區塊下關鍵字對應的整數值
+ */
+func (apiServer *APIServer) GetConfigPositiveIntValueOrPanic(key string) int {
+	return configurations.GetConfigPositiveIntValueOrPanic(reflect.TypeOf(*apiServer).String(), key) // 回傳取得的設定檔區塊下關鍵字對應的值
+}
+
+// start - 啟動API伺服器
+func (apiServer *APIServer) start() {
+
+	address := fmt.Sprintf(`%s:%d`,
+		apiServer.GetConfigValueOrPanic(`host`),
+		apiServer.GetConfigPositiveIntValueOrPanic(`port`),
+	) // 預設主機
+
+	network.SetAddressAlias(address, `API伺服器`) // 設定預設主機別名
+
+	gin.SetMode(gin.ReleaseMode)
+
+	enginePointer := gin.Default()
+
+	enginePointer.GET(
+		`/appUpdate/download/:downloadKeyword`,
+		func(ginContextPointer *gin.Context) {
+			getAPPsAPIHandler(apiServer, ginContextPointer)
+		},
+	)
+
+	// enginePointer.GET(
+	// 	`/:macAddress/CybLicense.bin`,
+	// 	func(ginContextPointer *gin.Context) {
+	// 		getMacAddressCybLicenseBinAPIHandler(apiServer, ginContextPointer)
+	// 	},
+	// )
+
+	// enginePointer.PUT(
+	// 	`/:macAddress/CybLicense.bin`,
+	// 	func(ginContextPointer *gin.Context) {
+	// 		putMacAddressCybLicenseBinAPIHandler(apiServer, ginContextPointer)
+	// 	},
+	// )
+
+	// enginePointer.DELETE(
+	// 	`/:macAddress/CybLicense.bin`,
+	// 	func(ginContextPointer *gin.Context) {
+	// 		deleteMacAddressCybLicenseBinAPIHandler(apiServer, ginContextPointer)
+	// 	},
+	// )
+
+	apiServerPointer := &http.Server{
+		Addr:    address,
+		Handler: enginePointer,
+	} // 設定伺服器
+
+	apiServer.server = apiServerPointer // 儲存伺服器指標
+
+	var apiServerPtrListenAndServeError error // 伺服器啟動錯誤
+
+	go func() {
+		apiServerPtrListenAndServeError = enginePointer.Run(address) // 啟動伺服器或回傳伺服器啟動錯誤
+
+		// const (
+		// 	certPEMFileName = `cert.pem`
+		// 	keyPEMFileName  = `key.pem`
+		// )
+
+		// tlss.CreateCertAndKeyPEMFiles(certPEMFileName, keyPEMFileName)
+
+		// apiServerPtrListenAndServeError = enginePointer.RunTLS(address, certPEMFileName, keyPEMFileName) // 啟動伺服器或回傳伺服器啟動錯誤
+
+		// apiServerPtrListenAndServeError = enginePointer.RunTLS(address, configurations.GetConfigValueOrPanic(`local`, `cert-pem-path`), configurations.GetConfigValueOrPanic(`local`, `private-key-pem-path`))
+	}()
+
+	<-time.After(time.Second * 3) // 等待伺服器啟動結果
+
+	logings.SendLog(
+		[]string{`%s %s 啟動 `},
+		network.GetAliasAddressPair(address),
+		apiServerPtrListenAndServeError,
+		logrus.PanicLevel,
+	)
+
+	select {}
+
+}
+
+// stop - 結束API伺服器
+func (apiServer *APIServer) stop() {
+
+	address := fmt.Sprintf(`%s:%d`,
+		apiServer.GetConfigValueOrPanic(`host`),
+		apiServer.GetConfigPositiveIntValueOrPanic(`port`),
+	) // 預設主機
+
+	logings.SendLog(
+		[]string{`%s %s 結束 `},
+		network.GetAliasAddressPair(address),
+		nil,
+		logrus.InfoLevel,
+	)
+
+	if nil == apiServer || nil == apiServer.server {
+		return
+	}
+
+	apiServerServerShutdownError := apiServer.server.Shutdown(context.TODO()) // 結束伺服器
+
+	logings.SendLog(
+		[]string{`%s %s 結束 `},
+		network.GetAliasAddressPair(address),
+		apiServerServerShutdownError,
+		logrus.PanicLevel,
+	)
+
+}
+
+// SendEvent - 傳送事件
+/**
+ * @param time.Time time 事件時間
+ * @param *gin.Context eventGinContextPointer  事件gin Context指標
+ * @param []interface{} eventInput 事件輸入
+ * @param []interface{} eventOutput 事件輸出
+ * @param  APIResponse eventAPIResponse 事件API回應
+ */
+func SendEvent(
+	eventTime time.Time,
+	eventGinContextPointer *gin.Context,
+	eventInput, eventOutput interface{},
+	eventStatus int,
+	eventAPIResponse APIResponse,
+) {
+	eventDataChannel <- EventData{
+		Time:              eventTime,
+		GinContextPointer: eventGinContextPointer,
+		Input:             eventInput,
+		Output:            eventOutput,
+		Status:            eventStatus,
+		APIResponse:       eventAPIResponse,
+	}
+}
+
+// StartUpdatingEvents - 開始更新事件
+func StartUpdatingEvents() {
+
+	logings.SendLog(
+		[]string{`啟動 %s 更新事件 `},
+		[]interface{}{`servers`},
+		nil,
+		0,
+	)
+
+	for {
+
+		eventData := <-eventDataChannel
+
+		go func() {
+
+			eventDataGinContextPointer := eventData.GinContextPointer
+
+			var event records.Event
+
+			eventDataGinContextPointer.ShouldBind(&event)
+
+			if jsonBytes, jsonMarshalError := json.Marshal(eventData); jsonMarshalError == nil {
+
+				if jsonUnmarshalError := json.Unmarshal(jsonBytes, &event); jsonUnmarshalError != nil {
+
+					logings.SendLog(
+						[]string{`將JSON字串 %s 轉成 物件 %+v `},
+						[]interface{}{string(jsonBytes), event},
+						jsonUnmarshalError,
+						logrus.PanicLevel,
+					)
+
+				}
+
+			} else {
+
+				logings.SendLog(
+					[]string{`將物件 %+v 轉成 JSON字串 %s `},
+					[]interface{}{eventData, string(jsonBytes)},
+					jsonMarshalError,
+					logrus.PanicLevel,
+				)
+
+			}
+
+			eventDataGinContextPointerRequest := eventDataGinContextPointer.Request
+			event.Method = eventDataGinContextPointerRequest.Method
+			event.Header = eventDataGinContextPointerRequest.Header
+
+			event.IP = eventDataGinContextPointer.ClientIP()
+			event.URL = eventDataGinContextPointer.FullPath()
+
+			event.Results = eventData.APIResponse.Results
+
+			mongoDB.RepsertEvent(event)
+
+		}()
+
+	}
+
+}
+
+// isLowerCaseOrDigit - 判斷是否小寫或數字
+/**
+ * @param  string inputString 輸入字串
+ * @return bool result 結果
+ */
+func isLowerCaseOrDigit(inputString string) (result bool) {
+
+	result, _ = regexp.MatchString(`^[0-9a-z]+$`, inputString)
+
+	return
+}
+
+// isFileNotExisted - 判斷是否檔案不存在
+/**
+ * @param  string downloadKeyword apps代號
+ * @return bool result 結果
+ */
+func isFileNotExisted(downloadKeyword string) (result bool) {
+
+	// 查資料夾是否不在
+	directoryName := downloadKeyword // 指定apk資料夾名稱
+	result = paths.IsFileNotExisted(paths.AppendSlashIfNotEndWithOne(configurations.GetConfigValueOrPanic(`local`, `path`)) + directoryName)
+	fmt.Println("檔案或路徑是否不存在？", result)
+	return
+
+	// 查檔案是否不在
+	// result = paths.IsFileNotExisted(paths.AppendSlashIfNotEndWithOne(configurations.GetConfigValueOrPanic(`local`, `path`)) + downloadKeyword + "/camera.apk")
+	// fmt.Print("路徑=", paths.AppendSlashIfNotEndWithOne(configurations.GetConfigValueOrPanic(`local`, `path`))+downloadKeyword+"/camera.apk")
+
+}
+
+// isAuthorized - 判斷是否認證通過
+/**
+ * @param  *gin.Context ginContextPointer  gin Context 指標
+ * @return bool result 結果
+ */
+func isAuthorized(ginContextPointer *gin.Context) (result bool) {
+
+	result, _ = regexp.MatchString(`^Basic\s+TGVhcHN5Vm9pY2VTZXJ2aWNlOjZXbUJuZ2R1SEZwc1I0eGRiSnU0ajZZdlNuV2VZYzdq$`, ginContextPointer.Request.Header.Get(`Authorization`))
+
+	return
+}
+
+// attachCybLicenseBin - 附加apk檔案（檔案下載）
+/**
+ * @param  *gin.Context ginContextPointer  gin Context 指標
+ * @param  string fileNameString 檔名字串
+ */
+func attachCybLicenseBin(ginContextPointer *gin.Context, downladKeyword string) {
+
+	// 指定apk資料夾名稱
+	directoryName := downladKeyword
+
+	// 去資料庫查此資料夾名稱所對應的APK檔名
+	result := mongoDB.FindAppsInfoByApkDirectoryName(directoryName)
+	// apkFileName := `camera.apk`
+
+	// 沒找到
+	if 1 > len(result) {
+		fmt.Printf("找不到此資料夾 \n")
+	} else {
+
+		// 取得APK檔名
+		apkFileName := result[0].ApkFileName
+
+		// 設定下載後檔名
+		downloadFileName := apkFileName
+
+		// 下載
+		ginContextPointer.FileAttachment(paths.AppendSlashIfNotEndWithOne(configurations.GetConfigValueOrPanic(`local`, `path`))+directoryName+`/`+apkFileName, downloadFileName)
+	}
+
+}
+
+// upsertCybLicenseBin - 更添授權檔
+/**
+ * @param  *gin.Context ginContextPointer  gin Context 指標
+ * @param  string fileNameString 檔名字串
+ * @return bool isSuccess 是否成功
+ */
+func upsertCybLicenseBin(ginContextPointer *gin.Context, fileNameString string) (isSuccess bool) {
+
+	path := paths.AppendSlashIfNotEndWithOne(configurations.GetConfigValueOrPanic(`local`, `path`))
+	paths.CreateIfPathNotExisted(path)
+
+	if destinationFilePointer, osCreateError := os.Create(path + fileNameString); osCreateError == nil {
+
+		defer destinationFilePointer.Close()
+
+		_, ioCopyError := io.Copy(destinationFilePointer, ginContextPointer.Request.Body)
+		isSuccess = ioCopyError == nil
+
+	}
+
+	return
+}
+
+// deleteCybLicenseBin - 刪除授權檔
+/**
+ * @param  string fileNameString 檔名字串
+ */
+func deleteCybLicenseBin(fileNameString string) {
+	os.Remove(paths.AppendSlashIfNotEndWithOne(configurations.GetConfigValueOrPanic(`local`, `path`)) + fileNameString)
+}
