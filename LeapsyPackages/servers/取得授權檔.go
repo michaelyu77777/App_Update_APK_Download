@@ -58,9 +58,15 @@ func getAPPsAPIHandler(apiServer *APIServer, ginContextPointer *gin.Context) {
 
 		// }()
 
+		apkDirectoryName := parametersDownladKeyword // apk資料夾名稱
+		apkFileName := ""                            //apk檔名
+
+		// 看檔案是否存在
 		go func() {
 
-			isError = isFileNotExisted(parametersDownladKeyword)
+			// 檔案存在會取得APK檔名
+			isError, apkFileName = isFileNotExistedAndGetApkFileName(apkDirectoryName)
+			// isError = isFileNotExisted(parametersDownladKeyword)
 
 			isToWorkChannel <- !isError
 
@@ -77,8 +83,11 @@ func getAPPsAPIHandler(apiServer *APIServer, ginContextPointer *gin.Context) {
 			}
 
 			if isToWork {
+
 				// 下載檔案
-				attachCybLicenseBin(ginContextPointer, parametersDownladKeyword)
+				attachApkFile(ginContextPointer, apkDirectoryName, apkFileName)
+				// attachCybLicenseBin(ginContextPointer, parametersDownladKeyword)
+
 				httpStatusChannel <- http.StatusOK
 			}
 
