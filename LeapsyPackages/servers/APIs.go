@@ -92,6 +92,14 @@ func (apiServer *APIServer) start() {
 		},
 	)
 
+	// 重新解析APK某資料夾的檔案
+	enginePointer.POST(
+		`/appUpdate/postReanalyse`,
+		func(ginContextPointer *gin.Context) {
+			postReanalyseAPIHandler(apiServer, ginContextPointer)
+		},
+	)
+
 	// enginePointer.GET(
 	// 	`/:macAddress/CybLicense.bin`,
 	// 	func(ginContextPointer *gin.Context) {
@@ -285,7 +293,7 @@ func isLowerCaseOrDigit(inputString string) (result bool) {
  * @param  string downloadKeyword apps代號
  * @return bool result 結果
  */
-func isFileNotExisted(downloadKeyword string) (result bool) {
+func isFileNotExistedByDirectoryName(downloadKeyword string) (result bool) {
 
 	// 查資料夾是否不在
 	directoryName := downloadKeyword // 指定apk資料夾名稱
@@ -321,14 +329,25 @@ func isFileNotExisted(downloadKeyword string) (result bool) {
  * @param  string downloadKeyword apps代號
  * @return bool result 結果 apkFileName APK檔名
  */
-func isFileNotExistedAndGetApkFileName(apkDirectoryName string) (result bool, apkFileName string) {
+func isFileNotExistedAndGetApkFileNameByDirectoryName(apkDirectoryName string) (result bool, apkFileName string) {
 
 	// 去資料庫查此資料夾名稱所對應的APK檔名
 	appsInfo := mongoDB.FindAppsInfoByApkDirectoryName(apkDirectoryName)
 
 	// 找不到此APP
 	if 1 > len(appsInfo) {
-		fmt.Printf("找不到名稱為[ %s ]的資料夾之APP\n", apkDirectoryName)
+
+		detail := `資料庫中找不到存放資料夾名稱為 apkDirectoryName:%s 的APP`
+
+		// log
+		logings.SendLog(
+			[]string{detail},
+			[]interface{}{apkDirectoryName},
+			nil,
+			logrus.WarnLevel,
+		)
+
+		fmt.Printf(detail+"\n", apkDirectoryName)
 		result = true
 		return
 

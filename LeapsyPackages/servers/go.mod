@@ -29,6 +29,7 @@ replace leapsy.com/packages/tlss => ../tlss
 require (
 	github.com/gin-gonic/autotls v0.0.3
 	github.com/gin-gonic/gin v1.7.3
+	github.com/shogo82148/androidbinary v1.0.2
 	github.com/sirupsen/logrus v1.8.1
 	leapsy.com/databases v0.0.0-00010101000000-000000000000
 	leapsy.com/packages/configurations v0.0.0-00010101000000-000000000000
